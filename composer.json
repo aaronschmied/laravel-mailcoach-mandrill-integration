@@ -1,0 +1,14 @@
+{
+    "name": "aaronschmied/laravel-mailcoach-mandrill-integration",
+    "type": "library",
+    "require": {
+        "therobfonz/laravel-mandrill-driver": "^2.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Aaron Schmied",
+            "email": "aaron@schmied.dev"
+        }
+    ]
+}
