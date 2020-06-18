@@ -16,9 +16,12 @@ class MandrillConfigurationDriver extends TransactionalMailConfigurationDriver
     public function validationRules(): array
     {
         return [
-            'mandrill_username' => 'required',
-            'mandrill_key' => 'required',
-
+            'mandrill_username' => ['required', 'string'],
+            'mandrill_key' => ['required', 'string'],
+            'track_opens' => ['boolean'],
+            'track_clicks' => ['boolean'],
+            'tracking_domain' => ['sometimes', 'required']
+            'return_path_domain' => ['sometimes', 'required']
 
         ];
     }
