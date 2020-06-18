@@ -1,5 +1,6 @@
 {
     "name": "aaronschmied/laravel-mailcoach-mandrill-integration",
+    "description": "Integration package for Mailcoach to use Mandrill.",
     "type": "library",
     "require": {
         "guzzlehttp/guzzle": "^6",
@@ -11,6 +12,5 @@
             "name": "Aaron Schmied",
             "email": "aaron@schmied.dev"
         }
-    ],
-    "description": "Integration package for Mailcoach to use Mandrill."
+    ]
 }
