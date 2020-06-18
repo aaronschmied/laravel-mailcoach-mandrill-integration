@@ -2,7 +2,8 @@
     "name": "aaronschmied/laravel-mailcoach-mandrill-integration",
     "type": "library",
     "require": {
-        "therobfonz/laravel-mandrill-driver": "^2.0"
+        "guzzlehttp/guzzle": "^6",
+        "illuminate/support": "^7"
     },
     "license": "MIT",
     "authors": [
@@ -10,5 +11,6 @@
             "name": "Aaron Schmied",
             "email": "aaron@schmied.dev"
         }
-    ]
+    ],
+    "description": "Integration package for Mailcoach to use Mandrill."
 }
