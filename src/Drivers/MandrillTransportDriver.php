@@ -3,8 +3,11 @@
 namespace SchmiedDev\MailcoachMandrillIntegration\Drivers;
 
 use GuzzleHttp\ClientInterface as Http;
+use GuzzleHttp\Exception\TransferException;
 use Illuminate\Config\Repository;
 use Illuminate\Mail\Transport\Transport;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Swift_Mime_SimpleMessage as Message;
 
 class MandrillTransportDriver extends Transport
@@ -49,25 +52,154 @@ class MandrillTransportDriver extends Transport
      * @param string[] $failedRecipients An array of failures by-reference
      *
      * @return int
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function send(Message $message, &$failedRecipients = null)
     {
         $this->beforeSendPerformed($message);
 
-        $this->client->request('POST', 'https://mandrillapp.com/api/1.0/messages/send-raw.json', [
-            'form_params' => [
-                'key'         => $this->config->get('key'),
-                'to'          => $this->getTo($message),
-                'raw_message' => $message->toString(),
-                'async'       => true,
-            ],
-        ]);
+        try {
+            $this->client->request(
+                'POST',
+                'messages/send.json',
+                [
+                    'form_params' => [
+                        'key'     => $this->config->get('key', ''),
+                        'message' => $this->encodeMessage($message),
+                        'ip_pool' => $this->config->get('ip_pool', null),
+                        'async'   => false,
+                    ],
+                ]
+            );
+        }
+        catch (TransferException $exception) {
+            Log::error('Could not send message', [
+                'response' => $exception->getMessage(),
+                'code'     => $exception->getCode(),
+            ]);
+
+            $failedRecipients = collect($this->getRecipients($message))
+                ->pluck('email')
+                ->toArray();
+
+            return 0;
+        }
 
         $this->sendPerformed($message);
 
         return $this->numberOfRecipients($message);
+    }
+
+    /**
+     * Encode the message.
+     *
+     * @param Message $message
+     *
+     * @return array
+     */
+    protected function encodeMessage(Message $message): array
+    {
+        $isBodyHtml = $message->getBodyContentType() === 'text/html';
+
+        return [
+            'html' => $isBodyHtml ? $message->getBody() : null,
+            'text' => $isBodyHtml ? null : $message->getBody(),
+
+            'auto_text' => $isBodyHtml,
+            'auto_html' => false,
+
+            'subject' => $message->getSubject(),
+
+            'from_email' => array_key_first($message->getFrom()),
+            'from_name'  => $message->getFrom()[array_key_first($message->getFrom())] ?? null,
+            'to'         => $this->getRecipients($message),
+
+            'headers' => $this->getMessageHeaders($message),
+
+            'important' => $message->getPriority() > 3,
+
+            'attachments' => $this->getAttachments($message),
+            'images'      => $this->getEmbeddedImages($message),
+
+            'track_opens'        => $this->config->get('track_opens', false),
+            'track_clicks'       => $this->config->get('track_clicks', false),
+            'tracking_domain'    => $this->config->get('tracking_domain', null),
+            'return_path_domain' => $this->config->get('return_path_domain', null),
+        ];
+    }
+
+    /**
+     * Get the messages headers as a key value array.
+     *
+     * @param Message $message
+     *
+     * @return array
+     */
+    protected function getMessageHeaders(Message $message): array
+    {
+        $headers = [];
+        foreach ($message->getHeaders()->getAll() as $header) {
+            $headers[$header->getFieldName()] = $header->getFieldBody();
+        }
+        return $headers;
+    }
+
+
+    /**
+     * Get the attachments.
+     *
+     * @param Message $message
+     *
+     * @return array|null
+     */
+    protected function getAttachments(Message $message): ?array
+    {
+        return $this->encodeAttachments(
+            collect($message->getChildren())
+                ->filter(function ($child) {
+                    return $child instanceof \Swift_Attachment;
+                })
+        );
+    }
+
+    /**
+     * Get the embedded images.
+     *
+     * @param Message $message
+     *
+     * @return array|null
+     */
+    protected function getEmbeddedImages(Message $message): ?array
+    {
+        return $this->encodeAttachments(
+            collect($message->getChildren())
+                ->filter(function ($child) {
+                    return $child instanceof \Swift_Image;
+                })
+        );
+    }
+
+    /**
+     * Encode the given attachments to the format required by mandrill.
+     *
+     * @param Collection $attachments
+     *
+     * @return array|null
+     */
+    protected function encodeAttachments(Collection $attachments): ?array
+    {
+        if ($attachments->isEmpty()) {
+            return null;
+        }
+
+        return $attachments
+            ->map(function (\Swift_Mime_Attachment $attachment) {
+                return [
+                    'type'    => $attachment->getContentType(),
+                    'name'    => $attachment->getFilename(),
+                    'content' => base64_encode($attachment->getBody()),
+                ];
+            })
+            ->toArray();
     }
 
     /**
@@ -79,22 +211,24 @@ class MandrillTransportDriver extends Transport
      *
      * @return array
      */
-    protected function getTo(Message $message)
+    protected function getRecipients(Message $message)
     {
-        $to = [];
+        $recipients = [];
 
-        if ($message->getTo()) {
-            $to = array_merge($to, array_keys($message->getTo()));
+        $targets = [
+            'to'  => $message->getTo(),
+            'cc'  => $message->getCc(),
+            'bcc' => $message->getBcc(),
+        ];
+
+        foreach ($targets as $type => $targetRecipients) {
+            if ($targetRecipients) {
+                foreach ($targetRecipients as $email => $name) {
+                    $recipients[] = compact('name', 'email', 'type');
+                }
+            }
         }
 
-        if ($message->getCc()) {
-            $to = array_merge($to, array_keys($message->getCc()));
-        }
-
-        if ($message->getBcc()) {
-            $to = array_merge($to, array_keys($message->getBcc()));
-        }
-
-        return $to;
+        return $recipients;
     }
 }
