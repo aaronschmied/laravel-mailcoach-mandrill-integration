@@ -4,6 +4,9 @@ namespace SchmiedDev\MailcoachMandrillIntegration;
 
 use GuzzleHttp\Client;
 use Illuminate\Config\Repository;
+use Illuminate\Mail\Events\MessageSent;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use SchmiedDev\MailcoachMandrillIntegration\Drivers\MandrillTransportDriver;
 
@@ -14,6 +17,13 @@ class MailcoachMandrillServiceProvider extends ServiceProvider
         $this
             ->registerTransportDriver()
             ->registerPublishedConfigurationDriver();
+    }
+
+    public function register()
+    {
+        Route::macro('mandrillFeedback', fn (string $url) => Route::post($url, '\\' . MandrillWebhookController::class));
+
+        Event::listen(MessageSent::class, StoreTransportMessageId::class);
     }
 
     /**
