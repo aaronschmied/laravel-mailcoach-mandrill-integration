@@ -10,8 +10,12 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "^6",
-        "illuminate/support": "^7"
+        "php": "^7.4",
+        "illuminate/support": "^7",
+        "guzzlehttp/guzzle": "^6.5",
+        "illuminate/http": "^7.0",
+        "spatie/laravel-mailcoach": "^2.9",
+        "spatie/laravel-webhook-client": "^2.2"
     },
     "autoload": {
         "psr-4": {

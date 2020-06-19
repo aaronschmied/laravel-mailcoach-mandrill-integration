@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Support\TransactionalMailConfiguration\Drivers;
+
+use App\Support\TransactionalMailConfiguration\Drivers\TransactionalMailConfigurationDriver;
+use Illuminate\Contracts\Config\Repository;
+
+class MandrillConfigurationDriver extends TransactionalMailConfigurationDriver
+{
+
+    public function name(): string
+    {
+        return 'mandrill';
+    }
+
+    public function validationRules(): array
+    {
+        return [
+            'mandrill_key' => ['required', 'string'],
+            'mandrill_track_opens' => ['boolean'],
+            'mandrill_track_clicks' => ['boolean'],
+            'mandrill_tracking_domain' => ['sometimes', 'required'],
+            'mandrill_return_path_domain' => ['sometimes', 'required'],
+            'mandrill_ip_pool' => ['sometimes', 'required']
+        ];
+    }
+
+    public function registerConfigValues(Repository $config, array $values)
+    {
+        $config->set('mail.mailers.mailcoach', [
+            'transport' => $this->name(),
+            'key' => $values['mandrill_key'],
+            'track_opens' => $values['mandrill_track_opens'] ?? false,
+            'track_clicks' => $values['mandrill_track_clicks'] ?? false,
+            'tracking_domain' => $values['mandrill_tracking_domain'] ?? null,
+            'return_path_domain' => $values['mandrill_return_path_domain'] ?? null,
+            'ip_pool' => $values['mandrill_ip_pool'] ?? null,
+        ]);
+    }
+}
