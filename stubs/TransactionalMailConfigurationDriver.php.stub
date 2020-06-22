@@ -19,11 +19,12 @@ class MandrillConfigurationDriver extends MailConfigurationDriver
             'default_from_mail' => ['required', 'email'],
             'mandrill_mails_per_second' => ['required', 'numeric','between:1,100'],
             'mandrill_key' => ['required', 'string'],
+            'mandrill_webhook_signing_key' => ['nullable', 'string'],
             'mandrill_track_opens' => ['boolean'],
             'mandrill_track_clicks' => ['boolean'],
-            'mandrill_tracking_domain' => ['sometimes', 'required'],
-            'mandrill_return_path_domain' => ['sometimes', 'required'],
-            'mandrill_ip_pool' => ['sometimes', 'required']
+            'mandrill_tracking_domain' => ['nullable'],
+            'mandrill_return_path_domain' => ['nullable'],
+            'mandrill_ip_pool' => ['nullable']
         ];
     }
 
@@ -32,6 +33,8 @@ class MandrillConfigurationDriver extends MailConfigurationDriver
         $this
             ->setDefaultFromEmail($config, $values['default_from_mail'] ?? '')
             ->throttleNumberOfMailsPerSecond($config, $values['mandrill_mails_per_second'] ?? 5);
+
+        $config->set('services.mandrill.webhook_signing_key', $values['mandrill_webhook_signing_key']);
 
         $config->set('mail.mailers.mailcoach-transactional', [
             'transport' => $this->name(),
