@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use SchmiedDev\MailcoachMandrillIntegration\Drivers\MandrillTransportDriver;
+use SchmiedDev\MailcoachMandrillIntegration\Feedback\MandrillWebhookController;
+use SchmiedDev\MailcoachMandrillIntegration\Jobs\StoreTransportMessageId;
 
 class MailcoachMandrillServiceProvider extends ServiceProvider
 {
@@ -19,9 +21,15 @@ class MailcoachMandrillServiceProvider extends ServiceProvider
             ->registerPublishedConfigurationDriver();
     }
 
+    /**
+     * Register the route macro and the events.
+     */
     public function register()
     {
-        Route::macro('mandrillFeedback', fn (string $url) => Route::post($url, '\\' . MandrillWebhookController::class));
+        Route::macro('mandrillFeedback', function (string $url) {
+            Route::any($url, '\\' . MandrillWebhookController::class)
+                ->name('mandrillFeedback');
+        });
 
         Event::listen(MessageSent::class, StoreTransportMessageId::class);
     }
