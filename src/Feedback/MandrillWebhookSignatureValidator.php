@@ -17,9 +17,7 @@ class MandrillWebhookSignatureValidator implements SignatureValidator
      */
     protected function getRequestPayloadForSigning(Request $request)
     {
-        $url = route('mandrillFeedback');
-
-        $signedData = $url;
+        $signedData = url(action(MandrillWebhookController::class));
 
         $params = $request->toArray();
 
@@ -43,7 +41,7 @@ class MandrillWebhookSignatureValidator implements SignatureValidator
      */
     public function isValid(Request $request, WebhookConfig $config): bool
     {
-        $requestSignature = (string) $request->header($config->signatureHeaderName);
+        $requestSignature = (string)$request->header($config->signatureHeaderName);
 
         $generatedSignature = base64_encode(
             hash_hmac(
