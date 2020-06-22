@@ -6,8 +6,10 @@ use GuzzleHttp\ClientInterface as Http;
 use GuzzleHttp\Exception\TransferException;
 use Illuminate\Config\Repository;
 use Illuminate\Mail\Transport\Transport;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Psr\Http\Message\ResponseInterface;
 use Swift_Mime_SimpleMessage as Message;
 
 class MandrillTransportDriver extends Transport
@@ -58,7 +60,7 @@ class MandrillTransportDriver extends Transport
         $this->beforeSendPerformed($message);
 
         try {
-            $this->client->request(
+            $response = $this->client->request(
                 'POST',
                 'messages/send.json',
                 [
@@ -70,6 +72,8 @@ class MandrillTransportDriver extends Transport
                     ],
                 ]
             );
+
+            $message->getHeaders()->addTextHeader('X-Mandrill-Message-Id', $this->getMessageId($response));
         }
         catch (TransferException $exception) {
             Log::error('Could not send message', [
@@ -87,6 +91,28 @@ class MandrillTransportDriver extends Transport
         $this->sendPerformed($message);
 
         return $this->numberOfRecipients($message);
+    }
+
+    /**
+     * Get the message id from the response.
+     *
+     * @param ResponseInterface $response
+     *
+     * @return string|null
+     */
+    protected function getMessageId(ResponseInterface $response): ?string
+    {
+        $responseBody = $response->getBody()->getContents();
+
+        try {
+            $responseData = json_decode($responseBody, true);
+            return Arr::get($responseData, '0._id');
+        }
+        catch (\Exception $exception) {
+            Log::warning('Could not read message id from mandrill response.');
+        }
+
+        return null;
     }
 
     /**
