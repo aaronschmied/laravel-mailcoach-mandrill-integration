@@ -2,10 +2,9 @@
 
 namespace App\Support\TransactionalMailConfiguration\Drivers;
 
-use App\Support\MailConfiguration\Drivers\MailConfigurationDriver;
 use Illuminate\Contracts\Config\Repository;
 
-class MandrillConfigurationDriver extends MailConfigurationDriver
+class MandrillConfigurationDriver extends TransactionalMailConfigurationDriver
 {
 
     public function name(): string
@@ -16,8 +15,6 @@ class MandrillConfigurationDriver extends MailConfigurationDriver
     public function validationRules(): array
     {
         return [
-            'default_from_mail' => ['required', 'email'],
-            'mandrill_mails_per_second' => ['required', 'numeric','between:1,100'],
             'mandrill_key' => ['required', 'string'],
             'mandrill_webhook_signing_key' => ['nullable', 'string'],
             'mandrill_track_opens' => ['boolean'],
