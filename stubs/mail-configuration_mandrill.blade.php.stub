@@ -1,0 +1,59 @@
+<x-help>
+    {!! __('You must set a webhook to: <code class="markup-code">:webhookUrl</code>', ['webhookUrl' => url(action(\SchmiedDev\MailcoachMandrillIntegration\Feedback\MandrillWebhookController::class))]) !!}
+</x-help>
+
+
+
+<x-text-field
+    :label="__('Mails per second')"
+    name="mandrill_mails_per_second"
+    type="number"
+    :value="$mailConfiguration->mandrill_mails_per_second"
+/>
+
+<x-text-field
+    :label="__('API Key')"
+    name="mandrill_key"
+    type="text"
+    :value="$mailConfiguration->mandrill_key"
+/>
+
+<x-text-field
+    :label="__('Webhook Signing Key')"
+    name="mandrill_webhook_signing_key"
+    type="text"
+    :value="$mailConfiguration->mandrill_webhook_signing_key"
+/>
+
+<x-checkbox-field
+    :label="__('Track Opens')"
+    name="mandrill_track_opens"
+    :checked="$mailConfiguration->mandrill_track_opens"
+/>
+
+<x-checkbox-field
+    :label="__('Track Clicks')"
+    name="mandrill_track_clicks"
+    :checked="$mailConfiguration->mandrill_track_clicks"
+/>
+
+<x-text-field
+    :label="__('Tracking Domain')"
+    name="mandrill_tracking_domain"
+    type="text"
+    :value="$mailConfiguration->mandrill_tracking_domain"
+/>
+
+<x-text-field
+    :label="__('Return Path Domain')"
+    name="mandrill_return_path_domain"
+    type="text"
+    :value="$mailConfiguration->mandrill_return_path_domain"
+/>
+
+<x-text-field
+    :label="__('IP Pool')"
+    name="mandrill_ip_pool"
+    type="text"
+    :value="$mailConfiguration->mandrill_ip_pool"
+/>

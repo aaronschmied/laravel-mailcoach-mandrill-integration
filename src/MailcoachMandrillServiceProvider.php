@@ -63,10 +63,22 @@ class MailcoachMandrillServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->publishes(
                 [
-                    __DIR__ . '/../stubs/MailConfigurationDriver.php.stub' => app_path('Support/MailConfiguration/Drivers/MandrillConfigurationDriver.php'),
-                    __DIR__ . '/../stubs/TransactionalMailConfigurationDriver.php.stub' => app_path('Support/TransactionalMailConfiguration/Drivers/MandrillConfigurationDriver.php')
+                    __DIR__ . '/../stubs/MailConfigurationDriver.php.stub'
+                    => app_path('Support/MailConfiguration/Drivers/MandrillConfigurationDriver.php'),
+                    __DIR__ . '/../stubs/TransactionalMailConfigurationDriver.php.stub'
+                    => app_path('Support/TransactionalMailConfiguration/Drivers/MandrillConfigurationDriver.php'),
                 ],
-                'mailcoach-mandrill-mail-configuration-driver'
+                'mailcoach-mandrill-mail-configuration-drivers'
+            );
+
+            $this->publishes(
+                [
+                    __DIR__ . '/../stubs/mail-configuration_mandrill.blade.php.stub'
+                    => resource_path('views/app/settings/mailConfiguration/partials/mandrill.blade.php'),
+                    __DIR__ . '/../stubs/transactional-mail-configuration_mandrill.blade.php.stub'
+                    => app_path('views/app/settings/transactionalMailConfiguration/partials/mandrill.blade.php'),
+                ],
+                'mailcoach-mandrill-mail-configuration-driver-views'
             );
         }
         return $this;

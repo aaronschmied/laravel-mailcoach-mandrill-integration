@@ -1,0 +1,20 @@
+<x-text-field
+    :label="__('API Key')"
+    name="mandrill_key"
+    type="text"
+    :value="$mailConfiguration->mandrill_key"
+/>
+
+<x-text-field
+    :label="__('Return Path Domain')"
+    name="mandrill_return_path_domain"
+    type="text"
+    :value="$mailConfiguration->mandrill_return_path_domain"
+/>
+
+<x-text-field
+    :label="__('IP Pool')"
+    name="mandrill_ip_pool"
+    type="text"
+    :value="$mailConfiguration->mandrill_ip_pool"
+/>
