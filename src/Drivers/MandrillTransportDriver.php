@@ -68,15 +68,16 @@ class MandrillTransportDriver extends Transport
                         'key'     => $this->config->get('key', ''),
                         'message' => $this->encodeMessage($message),
                         'ip_pool' => $this->config->get('ip_pool', null),
-                        'async'   => false,
+                        'async'   => true,
                     ],
                 ]
             );
 
-            $message->getHeaders()->addTextHeader('X-Mandrill-Message-Id', $this->getMessageId($response));
-        }
-        catch (TransferException $exception) {
-            Log::error('Could not send message', [
+            $message
+                ->getHeaders()
+                ->addTextHeader('X-Mandrill-Message-Id', $this->getMessageId($response));
+        } catch (TransferException $exception) {
+            Log::error('Mandrill could not send message', [
                 'response' => $exception->getMessage(),
                 'code'     => $exception->getCode(),
             ]);
