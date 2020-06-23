@@ -24,6 +24,6 @@ class MandrillEventFactory
             ->map(fn (string $eventClass) => new $eventClass($payload))
             ->first(fn (MandrillEvent $event) => $event->canHandlePayload());
 
-        return $sendgridEvent ?? new OtherEvent($payload);
+        return $event ?? new OtherEvent($payload);
     }
 }
