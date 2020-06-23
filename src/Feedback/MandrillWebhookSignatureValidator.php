@@ -19,8 +19,7 @@ class MandrillWebhookSignatureValidator implements SignatureValidator
     {
         $signedData = url(action(MandrillWebhookController::class));
 
-        $params = $request->toArray();
-
+        $params = $request->input();
         ksort($params);
 
         foreach ($params as $key => $value) {
@@ -52,6 +51,6 @@ class MandrillWebhookSignatureValidator implements SignatureValidator
             )
         );
 
-        return hash_equals($generatedSignature, $requestSignature);
+        return hash_equals($generatedSignature, $requestSignature) || $request->mandrill_events === '[]';
     }
 }
