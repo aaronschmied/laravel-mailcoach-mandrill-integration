@@ -27,7 +27,7 @@ class MailcoachMandrillServiceProvider extends ServiceProvider
     public function register()
     {
         Route::macro('mandrillFeedback', function (string $url) {
-            Route::any($url, '\\' . MandrillWebhookController::class);
+            Route::post($url, '\\' . MandrillWebhookController::class);
         });
 
         Event::listen(MessageSent::class, StoreTransportMessageId::class);
