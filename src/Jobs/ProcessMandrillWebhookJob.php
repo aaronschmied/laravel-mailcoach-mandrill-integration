@@ -26,8 +26,6 @@ class ProcessMandrillWebhookJob extends ProcessWebhookJob
     {
         $payload = $this->webhookCall->payload;
 
-        Log::info('Handle webhook call.', $payload);
-
         if (!$send = $this->getSend()) {
             return;
         };
@@ -41,7 +39,7 @@ class ProcessMandrillWebhookJob extends ProcessWebhookJob
 
     protected function getSend(): ?Send
     {
-        $messageId = Arr::get($this->webhookCall->payload, 'msg._id');
+        $messageId = Arr::get($this->webhookCall->payload, '_id');
 
         if (!$messageId) {
             return null;
